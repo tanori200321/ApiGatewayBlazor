@@ -41,6 +41,19 @@ namespace ApiGatewayBlazor.Server.Controllers
                 var resultado = JsonSerializer.Deserialize<List<WeatherForecast>>(contenido, options);
                 lista.AddRange(resultado!);
             }
+
+            var clienteSql = _httpClientFactory.CreateClient("Sql");
+            response = await clienteSql.GetAsync("/WeatherForecast");
+            if (response.IsSuccessStatusCode)
+            {
+                var contenido = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions()
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var resultado = JsonSerializer.Deserialize<List<WeatherForecast>>(contenido, options);
+                lista.AddRange(resultado!);
+            }
             return lista;
         }
     }
