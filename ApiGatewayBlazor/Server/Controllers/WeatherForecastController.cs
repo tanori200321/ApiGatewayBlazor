@@ -26,7 +26,7 @@ namespace ApiGatewayBlazor.Server.Controllers
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
                 TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = "Desde Blazor" + Summaries[Random.Shared.Next(Summaries.Length)]
+                Summary = "Desde Blazor" +   Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
         }
