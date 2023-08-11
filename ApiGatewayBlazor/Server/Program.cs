@@ -7,6 +7,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+
+// Configure the HTTP Clients
+
+builder.Services.AddHttpClient("Mongo", conf =>
+{
+    conf.BaseAddress = new Uri(builder.Configuration["Services:Mongo"]!);
+});
+
+builder.Services.AddHttpClient("Sql", conf =>
+{
+    conf.BaseAddress = new Uri(builder.Configuration["Services:Sql"]!);
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
