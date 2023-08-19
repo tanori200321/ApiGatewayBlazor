@@ -43,10 +43,10 @@ namespace ApiGatewayBlazor.Server.Controllers
             }
 
             var clienteSql = _httpClientFactory.CreateClient("Sql");
-            response = await clienteSql.GetAsync("/WeatherForecast");
-            if (response.IsSuccessStatusCode)
+            var responseSql = await clienteSql.GetAsync("/WeatherForecast");
+            if (responseSql.IsSuccessStatusCode)
             {
-                var contenido = await response.Content.ReadAsStringAsync();
+                var contenido = await responseSql.Content.ReadAsStringAsync();
                 var options = new JsonSerializerOptions()
                 {
                     PropertyNameCaseInsensitive = true
