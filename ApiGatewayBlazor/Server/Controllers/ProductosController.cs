@@ -4,6 +4,8 @@ using System.Text.Json;
 
 namespace ApiGatewayBlazor.Server.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class ProductosController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -31,7 +33,7 @@ namespace ApiGatewayBlazor.Server.Controllers
             //}
 
             var clienteSql = _httpClientFactory.CreateClient("Sql");
-            var responseSql = await clienteSql.GetAsync("/ProductosController");
+            var responseSql = await clienteSql.GetAsync("/api/Productos");
             if (responseSql.IsSuccessStatusCode)
             {
                 var contenido = await responseSql.Content.ReadAsStringAsync();

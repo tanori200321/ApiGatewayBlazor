@@ -1,5 +1,5 @@
 ﻿@page "/"
-@using ApiGatewayBlazor.Client.Models.Entidad;
+@using ApiGatewayBlazor.Client.Models.Entidad
 @inject HttpClient httpclient
 
 <PageTitle>Catalogo de Productos</PageTitle>
@@ -16,7 +16,6 @@
     .container-productos {
         margin-bottom: 10px;
     }
-
 </style>
 
 <table class="table table-bordered">
@@ -39,24 +38,24 @@
                 <td>@producto.Descripcion</td>
                 <td>@producto.Precio</td>
                 <td>@producto.CantidadStock</td>
-
+                <td>
+                    <button @onclick="() => LikeProducto(producto)">Like</button>
+                    <button @onclick="() => DislikeProducto(producto)">Dislike</button>
+                    <button @onclick="() => ComprarProducto(producto)">Comprar</button>
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
-
-
 @code {
 
-    List<ApiGatewayBlazor.Client.Models.Entidad.Producto> productos = new List<ApiGatewayBlazor.Client.Models.Entidad.
-    Producto>();
+    List<Producto> productos = new List<Producto>();
 
     protected override async Task OnInitializedAsync()
     {
         await BuscarFacturas();
     }
-
 
     private async Task BuscarFacturas()
     {
@@ -64,11 +63,7 @@
 
         try
         {
-            productos = await httpclient.GetFromJsonAsync<List<ApiGatewayBlazor.Client.Models.Entidad.Producto>>(apiUrl);
-            foreach(Producto producto in productos)
-            {
-                Console.WriteLine(producto.Nombre);
-            }
+            productos = await httpclient.GetFromJsonAsync<List<Producto>>(apiUrl);
         }
         catch (Exception ex)
         {
@@ -77,5 +72,21 @@
         }
     }
 
-}
+    private void LikeProducto(Producto producto)
+    {
+        // Implement your like logic here
+        Console.WriteLine($"Liked {producto.Nombre}");
+    }
 
+    private void DislikeProducto(Producto producto)
+    {
+        // Implement your dislike logic here
+        Console.WriteLine($"Disliked {producto.Nombre}");
+    }
+
+    private void ComprarProducto(Producto producto)
+    {
+        // Implement your purchase logic here
+        Console.WriteLine($"Purchased {producto.Nombre}");
+    }
+}
