@@ -1,56 +1,101 @@
 ﻿using ApiGatewayBlazor.SqlServer.Models;
 using ApiGatewayBlazor.SqlServer.Models.Entities;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace TuProyecto.Controllers
 {
-    public class StoreController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CarritoComprasController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _context;
 
-        public StoreController(ApplicationDbContext dbContext)
+        public CarritoComprasController(ApplicationDbContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
-        public async Task<List<Producto>> GetProductos()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CarritoCompras>>> GetCarritosCompras()
         {
-            return await _dbContext.Productos.ToListAsync();
+            var carritos = await _context.CarritoCompra.ToListAsync();
+            return Ok(carritos);
         }
 
-        public async Task<Cliente> GetCliente(int clienteId)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CarritoCompras>> GetCarritoCompras(int id)
         {
-            return await _dbContext.Clientes.FirstOrDefaultAsync(c => c.Id == clienteId);
-        }
+            var carrito = await _context.CarritoCompra.FindAsync(id);
 
-        public async Task<List<Pedidos>> GetPedidos()
-        {
-            return await _dbContext.Pedido.ToListAsync();
-        }
-
-        public async Task RealizarCompra(CarritoCompras carrito)
-        {
-            var producto = await _dbContext.Productos.FindAsync(carrito.IdProducto);
-
-            if (producto == null || producto.CantidadStock < carrito.Cantidad)
+            if (carrito == null)
             {
-                // Manejo de error si el producto no existe o no hay suficiente stock
-                return;
+                return NotFound();
             }
 
-            var pedido = new Pedidos
-            {
-                IdCliente = carrito.IdCliente,
-                IdProducto = carrito.IdProducto,
-                Cantidad = carrito.Cantidad,
-                Total = producto.Precio * carrito.Cantidad,
-                Fecha = DateTime.UtcNow
-            };
+            return Ok(carrito);
+        }
 
-            producto.CantidadStock -= carrito.Cantidad;
-            _dbContext.Pedido.Add(pedido);
-            await _dbContext.SaveChangesAsync();
+        [HttpPost]
+        public async Task<ActionResult<CarritoCompras>> PostCarritoCompras([FromBody] CarritoCompras carrito)
+        {
+            _context.CarritoCompra.Add(carrito);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetCarritoCompras", new { id = carrito.Id }, carrito);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCarritoCompras(int id, CarritoCompras carrito)
+        {
+            if (id != carrito.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(carrito).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CarritoComprasExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCarritoCompras(int id)
+        {
+            var carrito = await _context.CarritoCompra.FindAsync(id);
+            if (carrito == null)
+            {
+                return NotFound();
+            }
+
+            _context.CarritoCompra.Remove(carrito);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool CarritoComprasExists(int id)
+        {
+            return _context.CarritoCompra.Any(e => e.Id == id);
         }
     }
 }

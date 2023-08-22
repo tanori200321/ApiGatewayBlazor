@@ -60,8 +60,8 @@
     <div class="description">Descripción del producto lorem ipsum...</div>
     <div class="price">$99.99</div>
     <button class="btn btn-buy">Comprar</button>
-    <button class="btn btn-like" @onclick="IncrementLikes">👍 (@likes)</button>
-    <button class="btn btn-dislike" @onclick="IncrementDislikes">👎 (@dislikes)</button>
+    <button class="btn btn-like" @onclick="IncrementLikes">👍</button>
+    <button class="btn btn-dislike" @onclick="IncrementDislikes">👎</button>
 </div>
 
 @code {
@@ -75,6 +75,6 @@
 
     private void IncrementDislikes()
     {
-        dislikes++;
+        dislikes--;
     }
 }

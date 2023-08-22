@@ -1,0 +1,81 @@
+﻿@page "/"
+@using ApiGatewayBlazor.Client.Models.Entidad;
+@inject HttpClient httpclient
+
+<PageTitle>Catalogo de Productos</PageTitle>
+
+<style>
+    .container-stock {
+        margin-bottom: 10px;
+    }
+
+    .container-productos {
+        margin-bottom: 10px;
+    }
+
+    .container-productos {
+        margin-bottom: 10px;
+    }
+
+</style>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Folio</th>
+            <th>UUID</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Producto producto in productos)
+        {
+            <tr>
+                <td>@producto.Id</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Precio</td>
+                <td>@producto.CantidadStock</td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+@code {
+
+    List<ApiGatewayBlazor.Client.Models.Entidad.Producto> productos = new List<ApiGatewayBlazor.Client.Models.Entidad.
+    Producto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await BuscarFacturas();
+    }
+
+
+    private async Task BuscarFacturas()
+    {
+        string apiUrl = "/api/Productos";
+
+        try
+        {
+            productos = await httpclient.GetFromJsonAsync<List<ApiGatewayBlazor.Client.Models.Entidad.Producto>>(apiUrl);
+            foreach(Producto producto in productos)
+            {
+                Console.WriteLine(producto.Nombre);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exception (e.g., show an error message)
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+}
+

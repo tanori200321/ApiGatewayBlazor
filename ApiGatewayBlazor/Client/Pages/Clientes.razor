@@ -1,0 +1,55 @@
+﻿@page "/clientes"
+@using System.Net.Http
+@using System.Net.Http.Json
+
+<h1>Clientes Registrados</h1>
+
+@if (listaClientes == null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Contraseña</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in listaClientes)
+            {
+                <tr>
+                    <td>@cliente.Id</td>
+                    <td>@cliente.Nombre</td>
+                    <td>@cliente.Correo</td>
+                    <td>@cliente.Contraseña</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<Cliente> listaClientes;
+
+    [Inject]
+    private HttpClient httpClient { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaClientes = await httpClient.GetFromJsonAsync<List<Cliente>>("https://localhost:puerto/api/clientes");
+    }
+
+    public class Cliente
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public string Correo { get; set; }
+        public string Contraseña { get; set; }
+    }
+
+}

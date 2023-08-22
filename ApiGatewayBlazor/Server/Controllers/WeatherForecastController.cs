@@ -43,7 +43,7 @@ namespace ApiGatewayBlazor.Server.Controllers
             }
 
             var clienteSql = _httpClientFactory.CreateClient("Sql");
-            var responseSql = await clienteSql.GetAsync("/WeatherForecast");
+            var responseSql = await clienteSql.GetAsync("/StoreController");
             if (responseSql.IsSuccessStatusCode)
             {
                 var contenido = await responseSql.Content.ReadAsStringAsync();

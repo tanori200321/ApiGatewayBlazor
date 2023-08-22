@@ -11,10 +11,5 @@
         List<Producto> Productos { get; set; }
         List<Cliente> Clientes { get; set; }
 
-
-
-
-
-
     }
 }
