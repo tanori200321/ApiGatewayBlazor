@@ -1,9 +1,8 @@
 ﻿@page "/"
 @using ApiGatewayBlazor.Client.Models.Entidad
-@inject HttpClient httpclient
+@inject HttpClient httpClient
 
 <PageTitle>Catalogo de Productos</PageTitle>
-
 
 <h1>Productos</h1>
 
@@ -16,7 +15,6 @@
             <th>Precio</th>
             <th>CantidadStock</th>
             <th></th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -29,128 +27,73 @@
                 <td>@producto.Precio</td>
                 <td>@producto.CantidadStock</td>
                 <td>
-                    <button type="button" class="btn btn-success">Like</button>
-                    <button type="button" class="btn btn-danger">Dislike</button>
-                </td>
-                <td>
                     <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-<br />
-<h1>Producto Mas Gustados</h1>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Nombre</th>
-            <th>Descripcion</th>
-            <th>Precio</th>
-            <th>CantidadStock</th>
-            <th></th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (Producto producto in productos)
-        {
-            <tr>
-                <td>@producto.Id</td>
-                <td>@producto.Nombre</td>
-                <td>@producto.Descripcion</td>
-                <td>@producto.Precio</td>
-                <td>@producto.CantidadStock</td>
-                <td>
-                    <button type="button" class="btn btn-success">Like</button>
-                    <button type="button" class="btn btn-danger">Dislike</button>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-<br />
-<h1>Productos Menos Gustados</h1>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>Nombre</th>
-            <th>Descripcion</th>
-            <th>Precio</th>
-            <th>CantidadStock</th>
-            <th></th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (Producto producto in productos)
-        {
-            <tr>
-                <td>@producto.Id</td>
-                <td>@producto.Nombre</td>
-                <td>@producto.Descripcion</td>
-                <td>@producto.Precio</td>
-                <td>@producto.CantidadStock</td>
-                <td>
-                    <button type="button" class="btn btn-success">Like</button>
-                    <button type="button" class="btn btn-danger">Dislike</button>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-
 
 @code {
-
     List<Producto> productos = new List<Producto>();
 
     protected override async Task OnInitializedAsync()
     {
-        await BuscarFacturas();
+        await BuscarProductos();
     }
 
-    private async Task BuscarFacturas()
+    private async Task BuscarProductos()
     {
         string apiUrl = "/api/Productos";
 
         try
         {
-            productos = await httpclient.GetFromJsonAsync<List<Producto>>(apiUrl);
+            productos = await httpClient.GetFromJsonAsync<List<Producto>>(apiUrl);
         }
         catch (Exception ex)
         {
-            // Handle exception (e.g., show an error message)
             Console.WriteLine($"Error fetching data: {ex.Message}");
         }
     }
 
-    private void LikeProducto(Producto producto)
-    {
-        // Implement your like logic here
-        Console.WriteLine($"Liked {producto.Nombre}");
-    }
+    private Dictionary<int, int> cantidades = new Dictionary<int, int>();
 
-    private void DislikeProducto(Producto producto)
+    private async Task ComprarProducto(Producto producto)
     {
-        // Implement your dislike logic here
-        Console.WriteLine($"Disliked {producto.Nombre}");
-    }
+        if (cantidades.ContainsKey(producto.Id))
+        {
+            cantidades[producto.Id]++;
+        }
+        else
+        {
+            cantidades[producto.Id] = 1;
+        }
 
-    private void ComprarProducto(Producto producto)
-    {
-        // Implement your purchase logic here
-        Console.WriteLine($"Purchased {producto.Nombre}");
+        CarritoCompra carritoCompra = new CarritoCompra
+            {
+                IdCliente = 1,
+                IdProducto = producto.Id,
+                Cantidad = cantidades[producto.Id]
+            };
+
+        string apiUrl = "/api/CarritoCompras"; 
+
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync(apiUrl, carritoCompra);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Successfully added {producto.Nombre} to the cart. Quantity: {carritoCompra.Cantidad}");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to add {producto.Nombre} to the cart. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding to cart: {ex.Message}");
+        }
     }
 }
