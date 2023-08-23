@@ -23,11 +23,11 @@ namespace ApiGatewayBlazor.Mongo.Models
         [BsonElement("nombreCliente")]
         public string NombreCliente { get; set; } = string.Empty;
 
-        //DATOS PARA LOS LIKE Y DISLIKE:
+        [BsonElement("movimiento")]
+        public string Movimiento { get; set; } = string.Empty;
 
-        [BsonElement("tipoDeMovimiento")]
-        public bool Likes { get; set; }
-        public bool DisLikes { get; set; }
+        [BsonElement("valor")]
+        public int Valor { get; set; }
 
     }
 }
