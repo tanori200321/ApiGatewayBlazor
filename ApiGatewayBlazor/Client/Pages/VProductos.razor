@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using ApiGatewayBlazor.Client.Models.Entidad
+@using ApiGatewayBlazor.SqlServer.Models.Entities;
 @inject HttpClient httpClient
 
 <PageTitle>Catalogo de Productos</PageTitle>
@@ -15,6 +16,7 @@
             <th>Precio</th>
             <th>CantidadStock</th>
             <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -27,15 +29,26 @@
                 <td>@producto.Precio</td>
                 <td>@producto.CantidadStock</td>
                 <td>
-                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" @onclick="() => AgregarAlCarrito(producto)">+</button>
                 </td>
             </tr>
         }
     </tbody>
+
 </table>
+<button type="button" class="btn btn-success" @onclick="RealizarCompra">Comprar</button>
+<br />
+<h2>Total: @totalCompra</h2>
 
 @code {
     List<Producto> productos = new List<Producto>();
+    decimal totalCompra = 0;
+    Dictionary<int, int> carrito = new Dictionary<int, int>();
+    int idCliente = 1; 
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,44 +69,59 @@
         }
     }
 
-    private Dictionary<int, int> cantidades = new Dictionary<int, int>();
-
-    private async Task ComprarProducto(Producto producto)
+    private void AgregarAlCarrito(Producto producto)
     {
-        if (cantidades.ContainsKey(producto.Id))
+        if (carrito.ContainsKey(producto.Id))
         {
-            cantidades[producto.Id]++;
+            carrito[producto.Id]++;
         }
         else
         {
-            cantidades[producto.Id] = 1;
+            carrito[producto.Id] = 1;
         }
 
-        CarritoCompra carritoCompra = new CarritoCompra
-            {
-                IdCliente = 1,
-                IdProducto = producto.Id,
-                Cantidad = cantidades[producto.Id]
-            };
+        totalCompra += producto.Precio;
+        producto.CantidadStock--;
+    }
 
-        string apiUrl = "/api/CarritoCompras"; 
-
-        try
+    private async Task RealizarCompra()
+    {
+        foreach (var kvp in carrito)
         {
-            var response = await httpClient.PostAsJsonAsync(apiUrl, carritoCompra);
+            var pedido = new Pedidos
+                {
+                    IdCliente = idCliente,
+                    IdProducto = kvp.Key,
+                    Cantidad = kvp.Value,
+                    Total = totalCompra,
+                    Fecha = DateTime.Now
+                };
 
-            if (response.IsSuccessStatusCode)
+            string apiUrlPedidos = "/api/Pedidos";
+            string apiUrlCarrito = "/api/CarritoCompras";
+
+            try
             {
-                Console.WriteLine($"Successfully added {producto.Nombre} to the cart. Quantity: {carritoCompra.Cantidad}");
+                var responsePedidos = await httpClient.PostAsJsonAsync(apiUrlPedidos, pedido);
+                var responseCarrito = await httpClient.PostAsJsonAsync(apiUrlCarrito, pedido);
+
+                if (responsePedidos.IsSuccessStatusCode && responseCarrito.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Successfully added {kvp.Value} units of product with ID {kvp.Key} to the cart.");
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to add product with ID {kvp.Key} to the cart. Status code: {responsePedidos.StatusCode}");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine($"Failed to add {producto.Nombre} to the cart. Status code: {response.StatusCode}");
+                Console.WriteLine($"Error adding to cart: {ex.Message}");
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error adding to cart: {ex.Message}");
-        }
+
+        carrito.Clear();
+        totalCompra = 0; 
+        await BuscarProductos(); 
     }
 }

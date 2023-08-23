@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiGatewayBlazor.SqlServer.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class storeDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
