@@ -4,29 +4,19 @@
 
 <PageTitle>Catalogo de Productos</PageTitle>
 
-<style>
-    .container-stock {
-        margin-bottom: 10px;
-    }
 
-    .container-productos {
-        margin-bottom: 10px;
-    }
-
-    .container-productos {
-        margin-bottom: 10px;
-    }
-</style>
+<h1>Productos</h1>
 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Folio</th>
-            <th>UUID</th>
-            <th>Fecha</th>
-            <th>Tipo</th>
-            <th>Total</th>
-            <th>Acciones</th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>CantidadStock</th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -39,14 +29,88 @@
                 <td>@producto.Precio</td>
                 <td>@producto.CantidadStock</td>
                 <td>
-                    <button @onclick="() => LikeProducto(producto)">Like</button>
-                    <button @onclick="() => DislikeProducto(producto)">Dislike</button>
-                    <button @onclick="() => ComprarProducto(producto)">Comprar</button>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+<br />
+<h1>Producto Mas Gustados</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>CantidadStock</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Producto producto in productos)
+        {
+            <tr>
+                <td>@producto.Id</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Precio</td>
+                <td>@producto.CantidadStock</td>
+                <td>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<h1>Productos Menos Gustados</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>CantidadStock</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Producto producto in productos)
+        {
+            <tr>
+                <td>@producto.Id</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Precio</td>
+                <td>@producto.CantidadStock</td>
+                <td>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" @onclick="() => ComprarProducto(producto)">Comprar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
 
 @code {
 
