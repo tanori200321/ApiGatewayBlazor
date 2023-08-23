@@ -43,6 +43,85 @@
 <button type="button" class="btn btn-success" @onclick="RealizarCompra">Comprar</button>
 <br />
 <h2>Total: @totalCompra</h2>
+<br />
+<h1>Productos Mas Gustados</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>CantidadStock</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Producto producto in productos)
+        {
+            <tr>
+                <td>@producto.Id</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Precio</td>
+                <td>@producto.CantidadStock</td>
+                <td>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+<br />
+<h1>Productos Menos Gustados</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripcion</th>
+            <th>Precio</th>
+            <th>CantidadStock</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Producto producto in productos)
+        {
+            <tr>
+                <td>@producto.Id</td>
+                <td>@producto.Nombre</td>
+                <td>@producto.Descripcion</td>
+                <td>@producto.Precio</td>
+                <td>@producto.CantidadStock</td>
+                <td>
+                    <button type="button" class="btn btn-success">Like</button>
+                    <button type="button" class="btn btn-danger">Dislike</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @code {
     List<Producto> productos = new List<Producto>();
