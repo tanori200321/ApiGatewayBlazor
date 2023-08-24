@@ -1,5 +1,6 @@
 ﻿using ApiGatewayBlazor.Mongo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -12,80 +13,85 @@ namespace ApiGatewayBlazor.Mongo.Controllers
     public class VentasController : ControllerBase
     {
         private readonly IMongoCollection<Ventas> _ventasCollection;
+        private readonly ILogger<VentasController> _logger;
 
-        public VentasController(IMongoDatabase database)
+        private int _likeValue = 1;
+        private int _dislikeValue = -1000;
+
+        public VentasController(IMongoDatabase database, ILogger<VentasController> logger)
         {
             _ventasCollection = database.GetCollection<Ventas>("Ventas");
+            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ventas>>> GetVentas()
+        public async Task<IActionResult> GetVentas()
         {
-            var ventas = await _ventasCollection.Find(Builders<Ventas>.Filter.Empty).ToListAsync();
-            return Ok(ventas);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Ventas>> GetVenta(string id)
-        {
-            var venta = await _ventasCollection.Find(Builders<Ventas>.Filter.Eq("_id", id)).FirstOrDefaultAsync();
-
-            if (venta == null)
+            try
             {
-                return NotFound();
+                List<Ventas> ventas = await _ventasCollection.Find(venta => true).ToListAsync();
+                return Ok(ventas);
             }
-
-            return Ok(venta);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las ventas");
+                return StatusCode(500, "Error interno del servidor");
+            }
         }
+
+        [HttpPost("venta")]
+        public async Task<IActionResult> CreateVenta([FromBody] Ventas venta)
+        {
+            try
+            {
+
+                venta.Movimiento = venta.Valor > 0 ? "like" : "dislike";
+                venta.Valor = venta.Movimiento == "like" ? _likeValue : _dislikeValue;
+
+
+                await _ventasCollection.InsertOneAsync(venta);
+
+                return CreatedAtAction(nameof(GetVentas), new { id = venta.Id }, venta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear la venta");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+    }
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ReaccionController : ControllerBase
+    {
+        private int _likeValue = 1;
+        private int _dislikeValue = -1000;
 
         [HttpPost]
-        public async Task<ActionResult<Ventas>> PostVenta(Ventas venta)
+        public IActionResult ProcesarReaccion([FromBody] string movimiento)
         {
-            await _ventasCollection.InsertOneAsync(venta);
-            return CreatedAtAction(nameof(GetVenta), new { id = venta.Id }, venta);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVenta(string id)
-        {
-            var deleteResult = await _ventasCollection.DeleteOneAsync(Builders<Ventas>.Filter.Eq("_id", id));
-
-            if (deleteResult.DeletedCount == 0)
+            try
             {
-                return NotFound();
+                var valor = movimiento == "like" ? _likeValue : _dislikeValue;
+
+                if (movimiento == "like")
+                {
+                    _likeValue++;
+                }
+                else if (movimiento == "dislike")
+                {
+                    _dislikeValue--;
+                }
+
+                return Ok(valor);
             }
-
-            return NoContent();
-        }
-
-        [HttpPost("{id}/Like")]
-        public async Task<IActionResult> PostLike(string id)
-        {
-            var updateResult = await _ventasCollection.UpdateOneAsync(
-                Builders<Ventas>.Filter.Eq("_id", id),
-                Builders<Ventas>.Update.Inc(x => x.Valor, 1).Set(x => x.Movimiento, "like"));
-
-            if (updateResult.ModifiedCount == 0)
+            catch (Exception ex)
             {
-                return NotFound();
+  
+                return StatusCode(500, "Error interno del servidor");
             }
-
-            return NoContent();
-        }
-
-        [HttpPost("{id}/Dislike")]
-        public async Task<IActionResult> PostDislike(string id)
-        {
-            var updateResult = await _ventasCollection.UpdateOneAsync(
-                Builders<Ventas>.Filter.Eq("_id", id),
-                Builders<Ventas>.Update.Inc(x => x.Valor, -1000).Set(x => x.Movimiento, "dislike"));
-
-            if (updateResult.ModifiedCount == 0)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
         }
     }
 }
